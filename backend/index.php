@@ -51,7 +51,7 @@ Router::get('/api/health', function() {
 
 // Include API route files
 require_once __DIR__ . '/api/user.php';
-require_once __DIR__ . '/api/auth.php';
+require_once __DIR__ . '/api/login.php';
 require_once __DIR__ . '/api/post.php';
 
 // Run the router

@@ -49,9 +49,13 @@ CREATE TABLE post_categories (
 -- Insert initial users
 INSERT INTO users (username, password_hash, full_name, email, role)
 VALUES
-  ('admin', 'admin_hash', 'Admin User', 'admin@example.com', 'admin'),
-  ('editor', 'editor_hash', 'Editor User', 'editor@example.com', 'editor'),
-  ('user1', 'user1_hash', 'User One', 'user1@example.com', 'user');
+  ('admin', '$2y$10$5v.xwUj6GpHrfI4UEHAfeukXiRAIiDNoOaed3p6TW2ltvzQJRwuxi', 'Admin User', 'admin@example.com', 'admin'), --password=admin123
+  ('editor', '$2y$10$sojpkfI4CgTwv2D8zXN7FeZgrTuj3SrXA79i5ZIChANL3f.f7fHW.', 'Editor User', 'editor@example.com', 'editor'), ---password=editor123
+  ('user1', '$2y$10$./KHaZRPeZ7zEhFVKv.07.n3PK/yXNMComlSg72pbhvywhwMPUT9u', 'User One', 'user1@example.com', 'user'); ---password=user123
+  --- Passwords are hashed versions of 'admin123', 'editor123', and 'user123' respectively.
+  --- In a real application, use a secure method to generate and store passwords. 
+  --- For PHP, you can use password_hash('your_password', PASSWORD_DEFAULT); or PHP CLI you can run the following command in terminal:
+  --- php -r "echo password_hash('your_password', PASSWORD_DEFAULT);"
 
 -- Insert initial categories
 INSERT INTO categories (name)

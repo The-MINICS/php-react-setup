@@ -6,7 +6,7 @@ use App\Router;
 use App\Auth;
 
 // Get all posts with user info
-Router::get('/api/posts', function () {
+Router::get('/api/user-posts', function () {
   Auth::requireAuth();
   try {
     $posts = Database::query(
@@ -15,9 +15,11 @@ Router::get('/api/posts', function () {
           p.id,
           p.title,
           p.content,
+          p.status,
           p.created_at,
+          p.updated_at,
           p.user_id,
-          u.name as author_name,
+          u.full_name as author_name,
           u.email as author_email
         FROM posts p 
         LEFT JOIN users u ON p.user_id = u.id 
@@ -36,7 +38,7 @@ Router::get('/api/users', function () {
   Auth::requireAuth();
   try {
     $users = Database::query("
-      SELECT id, name, email, created_at 
+      SELECT id, username, full_name, email, provider_url, role, created_at, updated_at
       FROM users 
       ORDER BY created_at DESC
     ");
@@ -58,7 +60,7 @@ Router::get('/api/users/{id}', function () {
     }
 
     $users = Database::query("
-      SELECT id, name, email, created_at 
+      SELECT id, username, full_name, email, provider_url, role, created_at, updated_at
       FROM users 
       WHERE id = ?
     ", [(int)$id]);
@@ -81,9 +83,9 @@ Router::post('/api/users', function () {
     $data = Router::getRequestBody();
 
     // Validation
-    if (empty($data['name']) || empty($data['email'])) {
-      Response::badRequest('Name and email are required', [
-        'required_fields' => ['name', 'email']
+    if (empty($data['username']) || empty($data['full_name']) || empty($data['email']) || empty($data['password'])) {
+      Response::badRequest('username, full_name, email, and password are required', [
+        'required_fields' => ['username', 'full_name', 'email', 'password']
       ]);
       return;
     }
@@ -94,11 +96,21 @@ Router::post('/api/users', function () {
       return;
     }
 
+    // Hash password
+    $passwordHash = password_hash($data['password'], PASSWORD_DEFAULT);
+
     $user = Database::insert("
-      INSERT INTO users (name, email) 
-      VALUES (?, ?) 
-      RETURNING id, name, email, created_at
-    ", [trim($data['name']), trim($data['email'])]);
+      INSERT INTO users (username, password_hash, full_name, email, provider_url, role) 
+      VALUES (?, ?, ?, ?, ?, ?) 
+      RETURNING id, username, full_name, email, provider_url, role, created_at, updated_at
+    ", [
+      trim($data['username']),
+      $passwordHash,
+      trim($data['full_name']),
+      trim($data['email']),
+      $data['provider_url'] ?? null,
+      $data['role'] ?? 'user'
+    ]);
 
     if (empty($user)) {
       Response::serverError('Failed to create user');
@@ -108,7 +120,7 @@ Router::post('/api/users', function () {
     Response::success($user, 'User created successfully', 201);
   } catch (PDOException $e) {
     if (strpos($e->getMessage(), 'duplicate key') !== false) {
-      Response::error('Email already exists', 409);
+      Response::error('Username or Email already exists', 409);
     } else {
       Response::serverError('Database error occurred');
     }
@@ -130,8 +142,8 @@ Router::put('/api/users/{id}', function () {
     }
 
     // Validation
-    if (empty($data['name']) || empty($data['email'])) {
-      Response::badRequest('Name and email are required');
+    if (empty($data['username']) || empty($data['full_name']) || empty($data['email'])) {
+      Response::badRequest('username, full_name, and email are required');
       return;
     }
 
@@ -141,14 +153,23 @@ Router::put('/api/users/{id}', function () {
       return;
     }
 
+    $fields = [
+      trim($data['username']),
+      trim($data['full_name']),
+      trim($data['email']),
+      $data['provider_url'] ?? null,
+      $data['role'] ?? 'user',
+      (int)$id
+    ];
+
     $user = Database::insert(
       "
         UPDATE users 
-        SET name = ?, email = ? 
+        SET username = ?, full_name = ?, email = ?, provider_url = ?, role = ?, updated_at = CURRENT_TIMESTAMP
         WHERE id = ? 
-        RETURNING id, name, email, created_at
+        RETURNING id, username, full_name, email, provider_url, role, created_at, updated_at
       ",
-      [trim($data['name']), trim($data['email']), (int)$id]
+      $fields
     );
 
     if (empty($user)) {
@@ -159,7 +180,7 @@ Router::put('/api/users/{id}', function () {
     Response::success($user, 'User updated successfully');
   } catch (PDOException $e) {
     if (strpos($e->getMessage(), 'duplicate key') !== false) {
-      Response::error('Email already exists', 409);
+      Response::error('Username or Email already exists', 409);
     } else {
       Response::serverError('Database error occurred');
     }

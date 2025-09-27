@@ -7,19 +7,27 @@ use Firebase\JWT\Key;
 
 class Auth
 {
-  private static $secret = 'your-secret-key'; // เปลี่ยนเป็น secret จริง
+  private static $secret = null;
+
+  private static function getSecret()
+  {
+    if (self::$secret === null) {
+      self::$secret = getenv('JWT_SECRET');
+    }
+    return self::$secret;
+  }
 
   public static function generateToken(array $payload): string
   {
     $payload['iat'] = time();
-    $payload['exp'] = time() + 60 * 60 * 24; // 1 วัน
-    return JWT::encode($payload, self::$secret, 'HS256');
+    $payload['exp'] = time() + 60 * 60 * 24; // 1 day expiration
+    return JWT::encode($payload, self::getSecret(), 'HS256');
   }
 
   public static function verifyToken(string $token): ?array
   {
     try {
-      $decoded = JWT::decode($token, new Key(self::$secret, algorithm: 'HS256'));
+      $decoded = JWT::decode($token, new Key(self::getSecret(), 'HS256'));
       return (array) $decoded;
     } catch (\Exception $e) {
       return null;
@@ -28,9 +36,12 @@ class Auth
 
   public static function requireAuth(): array
   {
+    file_put_contents('/tmp/myapp.log', "RequireAuth called\n", FILE_APPEND);
     $authHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    file_put_contents('/tmp/myapp.log', "AuthHeader: $authHeader\n", FILE_APPEND);
     if (preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
       $token = $matches[1];
+      file_put_contents('/tmp/myapp.log', "Token Debug: $token\n", FILE_APPEND);
       // 1. check if it's a valid JWT
       $user = self::verifyToken($token);
       if ($user) {
@@ -53,7 +64,6 @@ class Auth
         // Optionally, you can generate a JWT for your own use
         $jwt = self::generateToken($userInfo);
         return ['user' => $userInfo, 'token' => $jwt];
-        //return $userInfo;
       }
     }
     Response::error('Unauthorized', 401);
