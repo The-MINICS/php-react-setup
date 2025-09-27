@@ -1,0 +1,23 @@
+{
+  "name": "myapp/modern-php-api",
+  "description": "Modern PHP API with Composer",
+  "type": "project",
+  "require": {
+    "slim/slim": "^4.12",
+    "slim/psr7": "^1.6",
+    "php-di/php-di": "^7.0",
+    "monolog/monolog": "^3.0",
+     "firebase/php-jwt": "^6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
