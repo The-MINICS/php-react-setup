@@ -16,11 +16,15 @@ Router::post('/api/auth/login', function () {
   if ($user && password_verify($password, $user[0]['password_hash'])) {
     $payload = [
       'id' => $user[0]['id'],
-      'username' => $user[0]['username'],
       'role' => $user[0]['role']
     ];
     $token = Auth::generateToken($payload);
-    Response::success(['token' => $token]);
+    Response::success([
+      'success' => true,
+      'message' => 'Login successful',
+      'name' => $user[0]['full_name'],
+      'token' => $token
+    ]);
   } else {
     Response::error('Invalid credentials', 401);
   }

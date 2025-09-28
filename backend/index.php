@@ -10,7 +10,7 @@ use App\Router;
 Router::init();
 
 // CORS headers for all requests
-header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Set error handler
-set_error_handler(function($severity, $message, $file, $line) {
+set_error_handler(function($severity, $message) {
   if (error_reporting() & $severity) {
     Response::serverError("Server error: {$message}");
   }
