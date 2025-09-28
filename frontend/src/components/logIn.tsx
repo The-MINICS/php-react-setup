@@ -10,7 +10,7 @@ async function handleLoginAction(_previousState: LoginResponse, formData: FormDa
   const password = formData.get('password');
 
   try {
-    const response = await axiosInstance.post('/login', { username, password });
+    const response = await axiosInstance.post('/api/auth/login', { username, password });
     const { success, message, role, token } = response.data;
     if (success && role && token) {
       localStorage.setItem('authToken', token);
