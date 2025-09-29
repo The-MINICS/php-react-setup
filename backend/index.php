@@ -1,24 +1,26 @@
 <?php
-
-require_once __DIR__ . '/vendor/autoload.php';
-
-use App\Database;
-use App\Response;
-use App\Router;
-
-// Initialize router
-Router::init();
-
-// CORS headers for all requests
+// Enable error reporting for debugging (disable in production)
 header('Access-Control-Allow-Origin: http://localhost:5173');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Allow-Credentials: true');
 
 // Handle preflight OPTIONS requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
   http_response_code(200);
   exit();
 }
+
+// Autoload dependencies
+require_once __DIR__ . '/vendor/autoload.php';
+
+// Import necessary classes
+use App\Database;
+use App\Response;
+use App\Router;
+
+// Initialize router
+Router::init();
 
 // Set error handler
 set_error_handler(function($severity, $message) {

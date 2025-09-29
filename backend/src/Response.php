@@ -3,8 +3,22 @@
 namespace App;
 
 class Response {
+  private static $corsHeaders = [
+    'Access-Control-Allow-Origin' => 'http://localhost:5173',
+    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers' => 'Content-Type, Authorization, X-Requested-With',
+    'Access-Control-Allow-Credentials' => 'true'
+  ];
+
+  private static function setCorsHeaders(): void {
+    foreach (self::$corsHeaders as $header => $value) {
+      header("$header: $value");
+    }
+  }
+
   public static function json(array $data, int $statusCode = 200): void {
     http_response_code($statusCode);
+    self::setCorsHeaders();
     header('Content-Type: application/json');
     echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit;
