@@ -7,7 +7,7 @@ use App\Auth;
 
 // Get all posts with user info
 Router::get('/api/user-posts', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   try {
     $posts = Database::query(
       "
@@ -35,7 +35,7 @@ Router::get('/api/user-posts', function () {
 
 // Get all users
 Router::get('/api/users', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('admin');
   try {
     $users = Database::query("
       SELECT id, username, full_name, email, provider_url, role, created_at, updated_at
@@ -50,7 +50,7 @@ Router::get('/api/users', function () {
 
 // Get user by ID
 Router::get('/api/users/{id}', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   try {
     $id = Router::getParam(0);
 
@@ -78,7 +78,7 @@ Router::get('/api/users/{id}', function () {
 
 // Create new user
 Router::post('/api/users', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('admin');
   try {
     $data = Router::getRequestBody();
 
@@ -131,7 +131,7 @@ Router::post('/api/users', function () {
 
 // Update user
 Router::put('/api/users/{id}', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   try {
     $id = Router::getParam(0);
     $data = Router::getRequestBody();
@@ -191,7 +191,7 @@ Router::put('/api/users/{id}', function () {
 
 // Delete user
 Router::delete('/api/users/{id}', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('admin');
   try {
     $id = Router::getParam(0);
 

@@ -1,7 +1,7 @@
-import { AuthProvider } from './context/authContex';
-import { ThemeProvider } from './components/themeProvider';
-import { BrowserRouter } from 'react-router-dom';
-import AppContent from './AppContent';
+import { BrowserRouter } from "react-router-dom";
+import AppContent from "./AppContent";
+import { AuthProvider } from "./context/AuthContex";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 export default function App() {
   return (

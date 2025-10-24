@@ -8,24 +8,23 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('authToken');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = config.headers || {};
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => {
-    return response;
-  },
+  (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
-    }
+    // if (error.response?.status === 401) {
+    //   localStorage.removeItem('authToken');
+    //   window.location.href = '/login';
+    // } else if (error.response?.status === 403) {
+    //   window.location.href = '/protected';
+    // }
     return Promise.reject(error);
   }
 );

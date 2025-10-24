@@ -1,21 +1,39 @@
-import { useState, type ReactNode } from 'react';
-import { AuthContext } from './authContext';
+import { useEffect, useState, type ReactNode } from "react";
+import { AuthContext } from "./authContext";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [role, setRole] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
 
-  const login = (userRole: string) => {
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if (token) {
+      try {
+        const decoded: { role: string; name?: string } = jwtDecode(token);
+        setIsLoggedIn(true);
+        setRole(decoded.role);
+        setName(decoded.name ?? null);
+      } catch {
+        setIsLoggedIn(false);
+        setRole(null);
+        setName(null);
+      }
+    }
+  }, []);
+
+  const login = (userRole: string, userName: string) => {
     setIsLoggedIn(true);
-    setName(name);
     setRole(userRole);
+    setName(userName);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
-    setName(null);
     setRole(null);
+    setName(null);
+    localStorage.removeItem("authToken");
   };
 
   return (

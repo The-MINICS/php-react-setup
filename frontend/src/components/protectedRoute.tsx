@@ -8,13 +8,21 @@ type ProtectedRouteProps = {
 
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { isLoggedIn, role } = useAuth();
+  const token = localStorage.getItem('authToken');
 
-  if (!isLoggedIn) {
+  if (!token) {
+    // no token in localStorage
     return <Navigate to="/login" replace />;
   }
 
+  if (!isLoggedIn) {
+    // not logged in or invalid token
+    return null;
+  }
+
   if (allowedRoles && (!role || !allowedRoles.includes(role))) {
-    return <Navigate to="/login" replace />;
+    // loged in but role not allowed
+    return <Navigate to={role ? `/${role}` : '/protected'} replace />;
   }
 
   return <>{children}</>;

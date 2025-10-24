@@ -1,8 +1,7 @@
 import { useAuth } from "@/context/useAuth";
 import type { LoginResponse } from "@/types/logInResponse";
-import axiosInstance from "@/utils/axiosInstance";
 import axios from "axios";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
@@ -12,19 +11,18 @@ async function handleLoginAction(
 ): Promise<LoginResponse> {
   const username = formData.get("username");
   const password = formData.get("password");
-  console.log("Form Data:", { username, password });
 
   if (typeof username !== "string" || typeof password !== "string") {
     return { success: false, message: "Invalid form data." };
   }
 
   try {
-    const response = await axiosInstance.post("/api/auth/login", {
+    const response = await axios.post("/api/auth/login", {
       username,
       password,
     });
-    const { success, message, name, token } = response.data;
-    if (success && name && token) {
+    const { name, token } = response.data.data;
+    if (name && token) {
       localStorage.setItem("authToken", token);
 
       // Decode the token to extract the role
@@ -34,18 +32,19 @@ async function handleLoginAction(
         success: true,
         message: "Login successful!",
         role: decodedToken.role,
+        name: name,
       };
     } else {
       return {
         success: false,
-        message: message || "Invalid response from server.",
+        message: "Invalid response from server.",
       };
     }
   } catch (error: unknown) {
     if (axios.isAxiosError(error) && error.response && error.response.data) {
       return {
         success: false,
-        message: error.response.data.message || "Login failed.",
+        message: "Login failed.",
       };
     }
     return {
@@ -66,10 +65,12 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  if (state.success && state.role) {
-    login(state.role);
-    navigate({ pathname: "/" });
-  }
+  useEffect(() => {
+    if (state.success && state.role && state.name) {
+      login(state.role, state.name);
+      navigate({ pathname: state.role ? `/${state.role}` : "/protected" });
+    }
+  }, [state.success, state.role, state.name, login, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300">
@@ -116,23 +117,12 @@ export default function Login() {
             </a>
             .
           </p>
-          {state.message && (
-            <div className="flex items-center gap-2 text-red-600">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className="size-6"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm8.706-1.442c1.146-.573 2.437.463 2.126 1.706l-.709 2.836.042-.02a.75.75 0 0 1 .67 1.34l-.04.022c-1.147.573-2.438-.463-2.127-1.706l.71-2.836-.042.02a.75.75 0 1 1-.671-1.34l.041-.022ZM12 9a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              {state.message}
-            </div>
-          )}
+          {state.message &&
+            (state.success ? (
+              <p className="text-green-600 font-medium">{state.message}</p>
+            ) : (
+              <p className="text-red-600 font-medium">{state.message}</p>
+            ))}
           <button
             type="submit"
             disabled={isPending}

@@ -7,14 +7,14 @@ use App\Auth;
 
 // Get all posts (protected)
 Router::get('/api/posts', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   $posts = Database::query('SELECT * FROM posts ORDER BY created_at DESC');
   Response::success($posts);
 });
 
 // Get single post (protected)
 Router::get('/api/posts/:id', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   $id = Router::getParam(0);
   $post = Database::query('SELECT * FROM posts WHERE id = ?', [$id]);
   if ($post) {
@@ -26,7 +26,7 @@ Router::get('/api/posts/:id', function () {
 
 // Create post (protected)
 Router::post('/api/posts', function () {
-  $user = Auth::requireAuth();
+  $user = Auth::requireAuth('user');
   $body = Router::getRequestBody();
   $title = $body['title'] ?? '';
   $content = $body['content'] ?? '';
@@ -41,7 +41,7 @@ Router::post('/api/posts', function () {
 
 // Update post (protected)
 Router::put('/api/posts/:id', function () {
-  $user = Auth::requireAuth();
+  $user = Auth::requireAuth('user');
   $id = Router::getParam(0);
   $body = Router::getRequestBody();
   $title = $body['title'] ?? '';
@@ -59,7 +59,7 @@ Router::put('/api/posts/:id', function () {
 
 // Delete post (protected)
 Router::delete('/api/posts/:id', function () {
-  Auth::requireAuth();
+  Auth::requireAuth('user');
   $id = Router::getParam(0);
   Database::execute('DELETE FROM posts WHERE id = ?', [$id]);
   Response::success([], 'Post deleted');
