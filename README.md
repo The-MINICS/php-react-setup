@@ -93,12 +93,12 @@ npm run dev
 ---
 
 ## License
-MIT
+The MINICS
 
 ---
 
 ## Contributors
-- @all (team)
+- @wongsadhorn2001
 
 ---
 
