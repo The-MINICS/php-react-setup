@@ -1,54 +1,82 @@
-# PHP Modern API
+## PHP Backend Documentation
 
-A modern PHP API setup using Docker, Apache, and PostgreSQL.
+## Overview
+This is the backend API for the PHP + React fullstack project. It provides authentication, user management, role-based access, and health check endpoints. The backend is designed to run in Docker with Apache and PHP 8.2.
 
-## Prerequisites
+---
 
-- [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/)
+## Structure
 
-## Getting Started
+```
+backend/
+├── index.php           # Main entry point
+├── Dockerfile          # Docker setup
+├── .htaccess           # Apache config
+├── api/                # API endpoints (login, user, etc.)
+├── src/                # Core PHP classes (Auth, Database, Response, etc.)
+├── db-init/            # SQL initialization scripts
+└── vendor/             # Composer dependencies
+```
 
-1. **Clone this repository:**
-   ```sh
-   git clone <repo-url>
-   cd php-modern-api
-   ```
+---
 
-2. **Configure environment variables:**
+## Setup & Usage
 
-   Create a `.env` file in the project root with the following content:
-   ```
-   POSTGRES_USER=youruser
-   POSTGRES_PASSWORD=yourpassword
-   POSTGRES_DB=yourdb
-   DB_HOST=db
-   DB_PORT=5432
-   ```
 
-3. **Start the application:**
-   ```sh
-   docker-compose up --build
-   ```
+### 1. Docker
+After building the Docker image for the first time, you need to install PHP dependencies:
+```sh
+docker compose exec web composer install
+```
+Then start the backend server:
+```sh
+docker compose up -d
+```
+Access the API at `http://localhost:8000`
 
-4. **Access the API:**
+### 2. Environment Variables
+- Configure JWT secret and other settings in `.env` or config files as needed.
 
-   - PHP API: [http://localhost:8000](http://localhost:8000)
-   - PostgreSQL: `localhost:5432` (from your host)
+### 3. Database
+- Initialization scripts in `db-init/init.sql`
+- Connects via `Database.php` class
 
-## Project Structure
+---
 
-- `Dockerfile` - PHP 8.2 + Apache setup
-- `docker-compose.yaml` - Multi-container orchestration (web + db)
-- `db-init/` - Place any SQL scripts here to initialize the database
+## API Endpoints
+- `POST /api/auth/login` — Login, returns JWT
+- `GET /api/users` — List users (admin only)
+- `GET /api/health` — Health check
 
-## Useful Commands
+---
 
-- Stop containers: `docker-compose down`
-- Install dependencies: `docker-compose exec web composer install`
+## Authentication & Authorization
+- Uses JWT for authentication
+- Role-based access (admin, user, etc.)
+- Token required in `Authorization: Bearer <token>` header
 
-## Notes
+---
 
-- Source code is mounted as a volume for live development.
-- Apache mod_rewrite is enabled for clean URLs.
+## Docker & Apache
+- Apache config allows `.htaccess` overrides
+- CORS headers set for development
+- PHP modules managed via Dockerfile
+
+---
+
+## Troubleshooting
+- CORS errors: Check `.htaccess` and PHP headers
+- 401/403 errors: Check JWT validity and role
+- Docker issues: Rebuild with `docker compose build`
+- Logs: `docker compose logs -f web` or check `/var/log/apache2/error.log` in container
+
+---
+
+## License
+MIT
+
+---
+
+## Contact
+For backend issues, open an issue or contact the maintainer.
 
