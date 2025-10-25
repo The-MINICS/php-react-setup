@@ -4,6 +4,7 @@ import axios from "axios";
 import { useActionState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import axiosInstance from "@/utils/axiosInstance";
 
 async function handleLoginAction(
   _previousState: LoginResponse,
@@ -17,7 +18,7 @@ async function handleLoginAction(
   }
 
   try {
-    const response = await axios.post("/api/auth/login", {
+    const response = await axiosInstance.post("/api/auth/login", {
       username,
       password,
     });
