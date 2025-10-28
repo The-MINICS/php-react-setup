@@ -11,10 +11,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = localStorage.getItem("authToken");
     if (token) {
       try {
-        const decoded: { role: string; name?: string } = jwtDecode(token);
+        const decoded: { role: string; name: string } = jwtDecode(token);
         setIsLoggedIn(true);
         setRole(decoded.role);
-        setName(decoded.name ?? null);
+        setName(decoded.name);
       } catch {
         setIsLoggedIn(false);
         setRole(null);
@@ -23,10 +23,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (userRole: string, userName: string) => {
-    setIsLoggedIn(true);
-    setRole(userRole);
-    setName(userName);
+  const login = (isLoggedIn: boolean) => {
+    if (isLoggedIn) {
+      const token = localStorage.getItem("authToken");
+      if (token) {
+        try {
+          const decoded: { role: string; name: string } = jwtDecode(token);
+          setIsLoggedIn(true);
+          setRole(decoded.role);
+          setName(decoded.name);
+        } catch {
+          setIsLoggedIn(false);
+          setRole(null);
+          setName(null);
+        }
+      }
+    } else {
+      setIsLoggedIn(false);
+      setRole(null);
+      setName(null);
+    }
   };
 
   const logout = () => {

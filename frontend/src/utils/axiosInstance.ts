@@ -20,7 +20,8 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      throw new Error('Unauthorized access - please log in again.');
+      localStorage.removeItem('authToken');
+      window.location.href = '/login';
     } else if (error.response?.status === 403) {
       throw new Error('Forbidden - you do not have permission to access this resource.');
     }

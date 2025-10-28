@@ -3,7 +3,6 @@ import type { LoginResponse } from "@/types/logInResponse";
 import axios from "axios";
 import { useActionState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
 import axiosInstance from "@/utils/axiosInstance";
 
 async function handleLoginAction(
@@ -22,18 +21,13 @@ async function handleLoginAction(
       username,
       password,
     });
-    const { name, token } = response.data.data;
-    if (name && token) {
+    const { token } = response.data.data;
+    if (token) {
       localStorage.setItem("authToken", token);
-
-      // Decode the token to extract the role
-      const decodedToken: { role: string } = jwtDecode(token);
 
       return {
         success: true,
         message: "Login successful!",
-        role: decodedToken.role,
-        name: name,
       };
     } else {
       return {
@@ -67,9 +61,9 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (state.success && state.role && state.name) {
-      login(state.role, state.name);
-      navigate({ pathname: state.role ? `/${state.role}` : "/protected" });
+    if (state.success) {
+      login(state.success);
+      navigate({ pathname: "/" });
     }
   }, [state.success, state.role, state.name, login, navigate]);
 
